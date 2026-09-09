@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Analyst Track — Bootcamp 13 Log</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink: #12141a;
+    --panel: #181b23;
+    --panel-2: #1f2330;
+    --line: #2c3140;
+    --text: #e9e6dd;
+    --text-dim: #9a9fae;
+    --amber: #e8a33d;
+    --amber-dim: #7a5a24;
+    --teal: #5fc7bd;
+    --teal-dim: #2e5551;
+    --rose: #d9707a;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--ink);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 34px 34px;
+    background-position: -1px -1px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 28px 18px 60px;
+  }
+
+  .wrap{ max-width: 920px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+  }
+
+  h1{
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 6px 0 0;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .sub{ color: var(--text-dim); font-size: 14px; margin-top: 6px; }
+
+  .stat{
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .stat .big{ font-size: 34px; font-weight: 700; color: var(--amber); line-height:1; }
+  .stat .lbl{ font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+  .progress-track{
+    height: 6px;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 18px 0 26px;
+    border: 1px solid var(--line);
+  }
+  .progress-fill{
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .tabs{ display:flex; gap: 6px; margin-bottom: 20px; }
+  .tab{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 8px 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: var(--radius);
+  }
+  .tab.active{ color: var(--ink); background: var(--amber); border-color: var(--amber); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .session{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .session.done{ border-color: var(--teal-dim); }
+
+  .session-head{
+    display:flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+
+  .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    width: 20px;
+  }
+
+  .date-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--amber);
+    white-space: nowrap;
+    width: 78px;
+  }
+
+  .topic{ flex: 1; font-size: 15px; font-weight: 500; }
+  .topic .sun-flag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--rose);
+    border: 1px solid var(--rose);
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 8px;
+  }
+
+  .priority{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .priority.high{ background: rgba(232,163,61,0.15); color: var(--amber); border:1px solid var(--amber-dim); }
+  .priority.mid{ background: rgba(95,199,189,0.12); color: var(--teal); border:1px solid var(--teal-dim); }
+  .priority.low{ background: rgba(154,159,174,0.1); color: var(--text-dim); border:1px solid var(--line); }
+
+  .mini-dots{ display:flex; gap: 4px; }
+  .dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .dot.on{ background: var(--teal); }
+
+  .session-body{
+    display:none;
+    padding: 4px 16px 18px 54px;
+    border-top: 1px solid var(--line);
+  }
+  .session-body.open{ display:block; }
+
+  .checks{ display:flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+  .chk{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor:pointer;
+  }
+  .chk input{ accent-color: var(--teal); width: 16px; height:16px; cursor:pointer; }
+  .chk.checked{ color: var(--text); }
+
+  textarea{
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: var(--radius);
+    resize: vertical;
+    min-height: 52px;
+    margin-top: 6px;
+  }
+  textarea::placeholder{ color: var(--text-dim); }
+  .note-label{ font-size: 11px; color: var(--text-dim); font-family:'IBM Plex Mono', monospace; }
+
+  /* routine view */
+  .routine-grid{ display:grid; grid-template-columns: 1fr; gap: 14px; }
+  @media(min-width: 720px){ .routine-grid{ grid-template-columns: 1fr 1fr; } }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .card h3{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--amber);
+    margin: 0 0 14px;
+    letter-spacing: 0.02em;
+  }
+  .rline{
+    display:flex;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 13px;
+  }
+  .rline:last-child{ border-bottom:none; }
+  .rtime{
+    font-family:'IBM Plex Mono', monospace;
+    color: var(--text-dim);
+    width: 96px;
+    flex-shrink: 0;
+  }
+  .note-flag{
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--rose);
+    border-left: 2px solid var(--rose);
+    padding-left: 10px;
+  }
+
+  footer{
+    margin-top: 30px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align:center;
+  }
+
+  .save-hint{
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--teal);
+    background: var(--panel);
+    border: 1px solid var(--teal-dim);
+    padding: 6px 12px;
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .save-hint.show{ opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">BOOTCAMP 13 · SEP 05 — DEC 12, 2026</div>
+      <h1>Data Analyst Track Log</h1>
+      <div class="sub">16 live sessions · sleep 6–7h · morning light + evening training every day</div>
+    </div>
+    <div class="stat">
+      <div class="big" id="pctBig">0%</div>
+      <div class="lbl" id="pctLbl">0 / 48 checkpoints</div>
+    </div>
+  </header>
+
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="sessions">SESSIONS</div>
+    <div class="tab" data-view="routine">DAILY ROUTINE</div>
+  </div>
+
+  <div class="view active" id="view-sessions">
+    <div id="sessionList"></div>
+  </div>
+
+  <div class="view" id="view-routine">
+    <div class="routine-grid">
+      <div class="card">
+        <h3>MON — FRI</h3>
+        <div class="rline"><div class="rtime">06:00</div><div>ตื่นนอน (นอนครบ 6.5–7 ชม.)</div></div>
+        <div class="rline"><div class="rtime">06:15</div><div>เดิน/วิ่งเบาๆ รับแสงเช้า</div></div>
+        <div class="rline"><div class="rtime">06:45</div><div>อาบน้ำ + อาหารเช้า</div></div>
+        <div class="rline"><div class="rtime">07:30</div><div>ทบทวนเบาๆ 15–20 นาที ก่อนเข้างาน</div></div>
+        <div class="rline"><div class="rtime">หลังงาน</div><div>เข้าฟิตเนส</div></div>
+        <div class="rline"><div class="rtime">20:30</div><div>ฝึกลงมือทำจริง 45–60 นาที</div></div>
+        <div class="rline"><div class="rtime">22:30</div><div>เตรียมนอน</div></div>
+        <div class="rline"><div class="rtime">23:00</div><div>เข้านอน</div></div>
+      </div>
+
+      <div class="card">
+        <h3>SAT — LIVE DAY</h3>
+        <div class="rline"><div class="rtime">06:00</div><div>วิ่ง/เดินรับแสงเช้า (ยาวขึ้นได้)</div></div>
+        <div class="rline"><div class="rtime">08:45</div><div>เข้าห้อง Live รอเริ่ม</div></div>
+        <div class="rline"><div class="rtime">09:00</div><div>🔴 Main Live Class (3 ชม.)</div></div>
+        <div class="rline"><div class="rtime">13:00</div><div>ลงมือฝึกทำตามหัวข้อวันนี้</div></div>
+        <div class="rline"><div class="rtime">17:00</div><div>เข้าฟิตเนส</div></div>
+        <div class="rline"><div class="rtime">21:00</div><div>สรุปโน้ต + วางแผนสัปดาห์ถัดไป</div></div>
+        <div class="rline"><div class="rtime">23:00</div><div>เข้านอน</div></div>
+        <div class="note-flag">อาทิตย์ 6 ก.ย. ใช้ตารางนี้แทน (Live AI Foundation ตกวันอาทิตย์)</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>DATA · SELF-TRACKED · SAVED LOCALLY TO THIS ARTIFACT</footer>
+</div>
+
+<div class="save-hint" id="saveHint">saved</div>
+
+<script>
+const sessions = [
+  {id:1, date:"SEP 05", day:"Sat", topic:"Intro to Data Science (Kick Off)", priority:"mid"},
+  {id:2, date:"SEP 06", day:"Sun", topic:"AI Foundation", priority:"mid", sun:true},
+  {id:3, date:"SEP 12", day:"Sat", topic:"Building a Second Brain", priority:"high"},
+  {id:4, date:"SEP 19", day:"Sat", topic:"Spreadsheets", priority:"low"},
+  {id:5, date:"SEP 26", day:"Sat", topic:"SQL Database", priority:"low"},
+  {id:6, date:"OCT 03", day:"Sat", topic:"Google Looker Studio", priority:"high"},
+  {id:7, date:"OCT 10", day:"Sat", topic:"R Programming", priority:"mid"},
+  {id:8, date:"OCT 17", day:"Sat", topic:"Data Transformation", priority:"high"},
+  {id:9, date:"OCT 24", day:"Sat", topic:"Data Visualization", priority:"mid"},
+  {id:10, date:"OCT 31", day:"Sat", topic:"Building Traffic (Web + SEO)", priority:"low"},
+  {id:11, date:"NOV 07", day:"Sat", topic:"Essential Statistics", priority:"high"},
+  {id:12, date:"NOV 14", day:"Sat", topic:"AI + Automating Your Work", priority:"high"},
+  {id:13, date:"NOV 21", day:"Sat", topic:"Essential Machine Learning", priority:"mid"},
+  {id:14, date:"NOV 28", day:"Sat", topic:"Python Programming", priority:"high"},
+  {id:15, date:"DEC 05", day:"Sat", topic:"Essential Python for Data Analyst", priority:"high"},
+  {id:16, date:"DEC 12", day:"Sat", topic:"Becoming Pro Generalist", priority:"high"},
+];
+
+const priorityLabel = {high:"HIGH FOCUS", mid:"MODERATE", low:"LIGHT PASS"};
+const STORAGE_KEY = "bootcamp13-progress";
+let state = {};
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY);
+    state = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){
+    state = {};
+  }
+  render();
+}
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+    flashSaved();
+  }catch(e){
+    console.error("save failed", e);
+  }
+}
+
+function flashSaved(){
+  const hint = document.getElementById('saveHint');
+  hint.classList.add('show');
+  setTimeout(()=> hint.classList.remove('show'), 900);
+}
+
+function getSess(id){
+  if(!state[id]) state[id] = {live:false, review:false, practice:false, note:""};
+  return state[id];
+}
+
+function computeProgress(){
+  let done = 0;
+  sessions.forEach(s => {
+    const st = getSess(s.id);
+    if(st.live) done++;
+    if(st.review) done++;
+    if(st.practice) done++;
+  });
+  const total = sessions.length * 3;
+  const pct = Math.round((done/total)*100);
+  document.getElementById('pctBig').textContent = pct + "%";
+  document.getElementById('pctLbl').textContent = done + " / " + total + " checkpoints";
+  document.getElementById('progressFill').style.width = pct + "%";
+}
+
+function render(){
+  const list = document.getElementById('sessionList');
+  list.innerHTML = "";
+  sessions.forEach(s => {
+    const st = getSess(s.id);
+    const allDone = st.live && st.review && st.practice;
+
+    const wrap = document.createElement('div');
+    wrap.className = "session" + (allDone ? " done" : "");
+
+    const head = document.createElement('div');
+    head.className = "session-head";
+    head.innerHTML = `
+      <div class="idx">${String(s.id).padStart(2,'0')}</div>
+      <div class="date-badge">${s.date}</div>
+      <div class="topic">${s.topic}${s.sun ? '<span class="sun-flag">SUN</span>' : ''}</div>
+      <div class="priority ${s.priority}">${priorityLabel[s.priority]}</div>
+      <div class="mini-dots">
+        <div class="dot ${st.live?'on':''}"></div>
+        <div class="dot ${st.review?'on':''}"></div>
+        <div class="dot ${st.practice?'on':''}"></div>
+      </div>
+    `;
+    head.addEventListener('click', () => {
+      body.classList.toggle('open');
+    });
+
+    const body = document.createElement('div');
+    body.className = "session-body";
+    body.innerHTML = `
+      <div class="checks">
+        <label class="chk ${st.live?'checked':''}"><input type="checkbox" data-id="${s.id}" data-field="live" ${st.live?'checked':''}> เข้า Live / ดูย้อนหลังแล้ว</label>
+        <label class="chk ${st.review?'checked':''}"><input type="checkbox" data-id="${s.id}" data-field="review" ${st.review?'checked':''}> ทบทวนโน้ตแล้ว</label>
+        <label class="chk ${st.practice?'checked':''}"><input type="checkbox" data-id="${s.id}" data-field="practice" ${st.practice?'checked':''}> ลงมือฝึกทำจริงแล้ว</label>
+      </div>
+      <div class="note-label">โน้ตส่วนตัว</div>
+      <textarea data-id="${s.id}" placeholder="สรุปสิ่งที่ได้ / จะฝึกอะไรต่อ...">${st.note || ''}</textarea>
+    `;
+
+    body.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const id = e.target.dataset.id;
+        const field = e.target.dataset.field;
+        getSess(id)[field] = e.target.checked;
+        saveState();
+        computeProgress();
+        render();
+        // reopen this session after re-render
+        setTimeout(() => {
+          const bodies = document.querySelectorAll('.session-body');
+          const idx = s.id - 1;
+          if(bodies[idx]) bodies[idx].classList.add('open');
+        }, 0);
+      });
+    });
+
+    let noteTimer;
+    body.querySelector('textarea').addEventListener('input', (e) => {
+      getSess(e.target.dataset.id).note = e.target.value;
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(saveState, 600);
+    });
+
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+  computeProgress();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  });
+});
+
+loadState();
+</script>
+</body>
+</html>
