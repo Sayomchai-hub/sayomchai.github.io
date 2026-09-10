@@ -1,1 +1,0 @@
-# sayomchai.github.io
