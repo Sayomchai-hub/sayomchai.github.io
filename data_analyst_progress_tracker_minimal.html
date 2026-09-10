@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Analyst Track — Bootcamp 13</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --line: #e7e5e0;
+    --text: #1c1c1a;
+    --text-dim: #8c8a83;
+    --accent: #3a5a98;
+    --accent-soft: #eef1f7;
+    --done: #3f8f6f;
+    --done-soft: #eaf4ef;
+    --radius: 8px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .wrap{ max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  header{ margin-bottom: 40px; }
+  .eyebrow{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  h1{
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .sub{ font-size: 14px; color: var(--text-dim); line-height: 1.5; }
+
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .progress-track{
+    flex:1;
+    height: 4px;
+    background: var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+  .progress-num{
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-num b{ color: var(--text); font-weight: 600; }
+
+  .tabs{
+    display:flex;
+    gap: 4px;
+    margin: 32px 0 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab{
+    font-size: 14px;
+    padding: 10px 4px;
+    margin-right: 20px;
+    color: var(--text-dim);
+    cursor:pointer;
+    border-bottom: 2px solid transparent;
+    background:none;
+  }
+  .tab.active{ color: var(--text); border-color: var(--accent); font-weight: 500; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .session{
+    border-bottom: 1px solid var(--line);
+  }
+  .session:first-child{ border-top: 1px solid var(--line); }
+
+  .session-head{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    padding: 16px 4px;
+    cursor:pointer;
+  }
+
+  .session-head:hover{ background: var(--surface); }
+
+  .idx{
+    font-size: 12px;
+    color: var(--text-dim);
+    width: 18px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .date-badge{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    width: 62px;
+    flex-shrink:0;
+  }
+
+  .topic{ flex:1; font-size: 15px; font-weight: 500; }
+  .sun-flag{
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+
+  .priority{
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .priority.high{ color: var(--accent); font-weight: 500; }
+
+  .ring{
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .ring.full{ border-color: var(--done); background: var(--done); }
+  .ring.partial{ border-color: var(--accent); }
+  .ring svg{ width: 12px; height: 12px; display:none; }
+  .ring.full svg{ display:block; }
+
+  .session-body{
+    display:none;
+    padding: 4px 4px 24px 34px;
+  }
+  .session-body.open{ display:block; }
+
+  .checks{ display:flex; flex-direction: column; gap: 12px; margin: 8px 0 18px; }
+  .chk{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-dim);
+    cursor:pointer;
+  }
+  .chk.checked{ color: var(--text); }
+  .chk input{
+    appearance:none;
+    width: 17px; height: 17px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    cursor:pointer;
+    position:relative;
+    flex-shrink:0;
+  }
+  .chk input:checked{
+    background: var(--done);
+    border-color: var(--done);
+  }
+  .chk input:checked::after{
+    content:"";
+    position:absolute;
+    left: 5px; top: 1px;
+    width: 4px; height: 9px;
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .note-label{
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  textarea{
+    width:100%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family:'Inter', sans-serif;
+    font-size: 13px;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 48px;
+  }
+  textarea:focus{ outline:none; border-color: var(--accent); }
+  textarea::placeholder{ color: #b8b6ae; }
+
+  .routine-grid{ display:grid; grid-template-columns: 1fr; gap: 20px; margin-top: 4px; }
+  @media(min-width: 640px){ .routine-grid{ grid-template-columns: 1fr 1fr; } }
+
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+  .card h3{
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 0 16px;
+    color: var(--text);
+  }
+  .rline{
+    display:flex;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--bg);
+    font-size: 13px;
+  }
+  .rline:last-child{ border-bottom:none; }
+  .rtime{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    width: 64px;
+    flex-shrink:0;
+    padding-top: 1px;
+  }
+  .note-flag{
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--bg);
+    padding-top: 12px;
+  }
+
+  footer{
+    margin-top: 48px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .save-hint{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 12px;
+    color: var(--done);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 7px 14px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events:none;
+  }
+  .save-hint.show{ opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Bootcamp 13 · Sep 5 – Dec 12, 2026</div>
+    <h1>Data Analyst Track</h1>
+    <div class="sub">16 live sessions · sleep 6–7h · morning light and evening training, every day</div>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-num"><b id="pctBig">0%</b> · <span id="pctLbl">0/48</span></div>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="sessions">Sessions</button>
+    <button class="tab" data-view="routine">Daily routine</button>
+  </div>
+
+  <div class="view active" id="view-sessions">
+    <div id="sessionList"></div>
+  </div>
+
+  <div class="view" id="view-routine">
+    <div class="routine-grid">
+      <div class="card">
+        <h3>Mon – Fri</h3>
+        <div class="rline"><div class="rtime">06:00</div><div>ตื่นนอน (นอนครบ 6.5–7 ชม.)</div></div>
+        <div class="rline"><div class="rtime">06:15</div><div>เดิน/วิ่งเบาๆ รับแสงเช้า</div></div>
+        <div class="rline"><div class="rtime">06:45</div><div>อาบน้ำ + อาหารเช้า</div></div>
+        <div class="rline"><div class="rtime">07:30</div><div>ทบทวนเบาๆ 15–20 นาที ก่อนเข้างาน</div></div>
+        <div class="rline"><div class="rtime">หลังงาน</div><div>เข้าฟิตเนส</div></div>
+        <div class="rline"><div class="rtime">20:30</div><div>ฝึกลงมือทำจริง 45–60 นาที</div></div>
+        <div class="rline"><div class="rtime">22:30</div><div>เตรียมนอน</div></div>
+        <div class="rline"><div class="rtime">23:00</div><div>เข้านอน</div></div>
+      </div>
+
+      <div class="card">
+        <h3>Sat — Live day</h3>
+        <div class="rline"><div class="rtime">06:00</div><div>วิ่ง/เดินรับแสงเช้า (ยาวขึ้นได้)</div></div>
+        <div class="rline"><div class="rtime">08:45</div><div>เข้าห้อง Live รอเริ่ม</div></div>
+        <div class="rline"><div class="rtime">09:00</div><div>Main Live Class (3 ชม.)</div></div>
+        <div class="rline"><div class="rtime">13:00</div><div>ลงมือฝึกทำตามหัวข้อวันนี้</div></div>
+        <div class="rline"><div class="rtime">17:00</div><div>เข้าฟิตเนส</div></div>
+        <div class="rline"><div class="rtime">21:00</div><div>สรุปโน้ต + วางแผนสัปดาห์ถัดไป</div></div>
+        <div class="rline"><div class="rtime">23:00</div><div>เข้านอน</div></div>
+        <div class="note-flag">อาทิตย์ 6 ก.ย. ใช้ตารางนี้แทน — Live AI Foundation ตกวันอาทิตย์</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Progress is saved automatically to this page.</footer>
+</div>
+
+<div class="save-hint" id="saveHint">Saved</div>
+
+<script>
+const sessions = [
+  {id:1, date:"SEP 05", topic:"Intro to Data Science (Kick Off)", priority:"mid"},
+  {id:2, date:"SEP 06", topic:"AI Foundation", priority:"mid", sun:true},
+  {id:3, date:"SEP 12", topic:"Building a Second Brain", priority:"high"},
+  {id:4, date:"SEP 19", topic:"Spreadsheets", priority:"low"},
+  {id:5, date:"SEP 26", topic:"SQL Database", priority:"low"},
+  {id:6, date:"OCT 03", topic:"Google Looker Studio", priority:"high"},
+  {id:7, date:"OCT 10", topic:"R Programming", priority:"mid"},
+  {id:8, date:"OCT 17", topic:"Data Transformation", priority:"high"},
+  {id:9, date:"OCT 24", topic:"Data Visualization", priority:"mid"},
+  {id:10, date:"OCT 31", topic:"Building Traffic (Web + SEO)", priority:"low"},
+  {id:11, date:"NOV 07", topic:"Essential Statistics", priority:"high"},
+  {id:12, date:"NOV 14", topic:"AI + Automating Your Work", priority:"high"},
+  {id:13, date:"NOV 21", topic:"Essential Machine Learning", priority:"mid"},
+  {id:14, date:"NOV 28", topic:"Python Programming", priority:"high"},
+  {id:15, date:"DEC 05", topic:"Essential Python for Data Analyst", priority:"high"},
+  {id:16, date:"DEC 12", topic:"Becoming Pro Generalist", priority:"high"},
+];
+
+const priorityLabel = {high:"High focus", mid:"Moderate", low:"Light pass"};
+const STORAGE_KEY = "bootcamp13-progress";
+let state = {};
+let openId = null;
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    state = raw ? JSON.parse(raw) : {};
+  }catch(e){
+    // localStorage unavailable (e.g. private browsing) — fall back to in-memory only
+    state = {};
+  }
+  render();
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    flashSaved();
+  }catch(e){
+    console.error("save failed", e);
+  }
+}
+
+function flashSaved(){
+  const hint = document.getElementById('saveHint');
+  hint.classList.add('show');
+  setTimeout(()=> hint.classList.remove('show'), 900);
+}
+
+function getSess(id){
+  if(!state[id]) state[id] = {live:false, review:false, practice:false, note:""};
+  return state[id];
+}
+
+function computeProgress(){
+  let done = 0;
+  sessions.forEach(s => {
+    const st = getSess(s.id);
+    if(st.live) done++;
+    if(st.review) done++;
+    if(st.practice) done++;
+  });
+  const total = sessions.length * 3;
+  const pct = Math.round((done/total)*100);
+  document.getElementById('pctBig').textContent = pct + "%";
+  document.getElementById('pctLbl').textContent = done + "/" + total;
+  document.getElementById('progressFill').style.width = pct + "%";
+}
+
+function render(){
+  const list = document.getElementById('sessionList');
+  list.innerHTML = "";
+  sessions.forEach(s => {
+    const st = getSess(s.id);
+    const count = [st.live, st.review, st.practice].filter(Boolean).length;
+    const ringClass = count === 3 ? "full" : (count > 0 ? "partial" : "");
+
+    const wrap = document.createElement('div');
+    wrap.className = "session";
+
+    const head = document.createElement('div');
+    head.className = "session-head";
+    head.innerHTML = `
+      <div class="idx">${String(s.id).padStart(2,'0')}</div>
+      <div class="date-badge">${s.date}</div>
+      <div class="topic">${s.topic}${s.sun ? '<span class="sun-flag">Sun</span>' : ''}</div>
+      <div class="priority ${s.priority}">${priorityLabel[s.priority]}</div>
+      <div class="ring ${ringClass}"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    `;
+    head.addEventListener('click', () => {
+      openId = (openId === s.id) ? null : s.id;
+      render();
+    });
+
+    const body = document.createElement('div');
+    body.className = "session-body" + (openId === s.id ? " open" : "");
+    body.innerHTML = `
+      <div class="checks">
+        <label class="chk ${st.live?'checked':''}"><input type="checkbox" data-field="live" ${st.live?'checked':''}> เข้า Live / ดูย้อนหลังแล้ว</label>
+        <label class="chk ${st.review?'checked':''}"><input type="checkbox" data-field="review" ${st.review?'checked':''}> ทบทวนโน้ตแล้ว</label>
+        <label class="chk ${st.practice?'checked':''}"><input type="checkbox" data-field="practice" ${st.practice?'checked':''}> ลงมือฝึกทำจริงแล้ว</label>
+      </div>
+      <div class="note-label">โน้ตส่วนตัว</div>
+      <textarea placeholder="สรุปสิ่งที่ได้ / จะฝึกอะไรต่อ...">${st.note || ''}</textarea>
+    `;
+
+    body.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        getSess(s.id)[e.target.dataset.field] = e.target.checked;
+        saveState();
+        computeProgress();
+        render();
+      });
+    });
+
+    let noteTimer;
+    body.querySelector('textarea').addEventListener('input', (e) => {
+      getSess(s.id).note = e.target.value;
+      clearTimeout(noteTimer);
+      noteTimer = setTimeout(saveState, 600);
+    });
+
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    list.appendChild(wrap);
+  });
+  computeProgress();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+  });
+});
+
+loadState();
+</script>
+</body>
+</html>
